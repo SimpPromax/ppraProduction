@@ -37,7 +37,7 @@ import competitionAuthorityLogo from '../../assets/commonPics/Competition author
 import ecitizenLogo from '../../assets/commonPics/E citizen logo.png';
 import ethicsLogo from '../../assets/commonPics/Ethics and anti corruption logo.png';
 import germanCorporationLogo from '../../assets/commonPics/German corporation logo.png';
-import kisimLogo from '../../assets/commonPics/Kisim logo.png';
+import kisimLogo from '../../assets/commonPics/kisim logo.png';
 import officeOfAgLogo from '../../assets/commonPics/offiOf AG.png';
 import openContractingLogo from '../../assets/commonPics/Open contracting partnership logo.png';
 import openOwnershipLogo from '../../assets/commonPics/Open ownership logo.png';

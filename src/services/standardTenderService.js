@@ -5,7 +5,7 @@
  * Handles multiple tabs (2022, 2021, Archive)
  */
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
 const PROXY_ENDPOINT = `${BACKEND_URL}/api/proxy/standard-tender-documents`;
 
 class StandardTenderService {
