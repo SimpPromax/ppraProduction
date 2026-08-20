@@ -1,408 +1,170 @@
-// about.jsx - Updated with hover-only TTS and brute-style banner
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+// capacity-building-levy.jsx - Updated with FontAwesome icons and Tailwind CSS
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
-  faScaleBalanced, 
-  faGraduationCap, 
+  faFilePdf, 
+  faDownload, 
+  faMoneyBillWave, 
+  faLaptop, 
   faChartLine, 
-  faLaptopCode, 
-  faMagnifyingGlass, 
-  faHandshake, 
   faBuilding, 
-  faShieldHalved,
+  faShieldAlt, 
+  faInfoCircle,
+  faChevronDown,
+  faPhone,
+  faEnvelope,
+  faGlobe,
   faMousePointer
 } from "@fortawesome/free-solid-svg-icons";
 
-// Import Text-to-Speech Component (Hover-Only)
-import TextToSpeech from '../../components/text-to-speech/TextToSpeech';
+// ===== ADD THIS IMPORT =====
+import TextToSpeech from '../components/text-to-speech/TextToSpeech';
 
-// Register ScrollTrigger plugin
-gsap.registerPlugin(ScrollTrigger);
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // Import assets
-import logoImage from '../../assets/commonPics/circle logo for ppra.png';
-import kenyanFlag from '../../assets/commonPics/kenyan flag.jpg';
-import newspaperImage from '../../assets/commonPics/ppra finaicial newspaper pic.jpg';
-import corporateSky from '../../assets/commonPics/ppra building.jpeg';
+import logoImage from '../assets/commonPics/circle logo for ppra.png';
+import corporateSky from '../assets/commonPics/ppra building.jpeg';
 
 
-
-// Import partner logos
-import competitionAuthorityLogo from '../../assets/commonPics/Competition authority of kenya logo.png';
-import ecitizenLogo from '../../assets/commonPics/E citizen logo.png';
-import ethicsLogo from '../../assets/commonPics/Ethics and anti corruption logo.png';
-import germanCorporationLogo from '../../assets/commonPics/German corporation logo.png';
-import kisimLogo from '../../assets/commonPics/kisim logo.png';
-import officeOfAgLogo from '../../assets/commonPics/offiOf AG.png';
-import openContractingLogo from '../../assets/commonPics/Open contracting partnership logo.png';
-import openOwnershipLogo from '../../assets/commonPics/Open ownership logo.png';
-
-
-
-// Import leadership images
-import Mwangi_Wairia from '../../assets/board members/Mwangi-wa-Iria-284x300.jpg';
-import Ali_Mohamed from '../../assets/board members/Ali-Mohamed-Haji-Habib-240x300.jpg';
-import Linda_Susan from '../../assets/board members/Linda-Susan-Ingari-300x300.jpg';
-import Allan_Kamau from '../../assets/board members/Allan-Kamau-233x300.jpg';
-import AmosSimiyu from '../../assets/board members/Amos-Simiyu-Makokha-300x300.jpg';
-import EricKorir from '../../assets/board members/Eric-Korir-300x300.jpg';
-import PatrickKimemia from '../../assets/board members/Patrick-Kimemia-Ndirangu-300x300.jpg';
-
-// Leadership team data
-const leadershipTeamPreview = [
+// FAQ/Accordion Data - Fixed content with proper paragraph breaks
+const levyAccordionData = [
   {
-    id: "Mwangi Wa Iria",
-    name: "Hon. Mwangi Wa Iria",
-    title: "Board Chair",
-    image: Mwangi_Wairia,
-    description: "Former Governor of Murang'a County with extensive experience in public and private sectors. Pioneered transformative policies in agriculture, cooperative development, and enterprise growth."
+    id: 'legal-background',
+    title: 'Legal Background',
+    content: `Vide legal notice no. 206 dated 6th November 2023, the Cabinet Secretary, The National Treasury and Economic Planning pursuant to the provisions of sections 24(5)(d) and 180 of the Public Procurement and Asset Disposal Act (the Act) issued the Public Procurement Capacity Building Levy Order (the Levy Order), 2023 which provided among others that:
+
+"there shall be a levy by a supplier on all procurement contracts signed between the supplier and a procuring entity, at the rate of zero-point zero three percent (0.03%) of the value of the signed contracts exclusive of applicable taxes."`
   },
   {
-    id: "Ali Mohamed",
-    name: "Mr. Ali Mohamed",
-    title: "Board Member",
-    image: Ali_Mohamed,
-    description: "CEO of Nairobi Calibration Services Limited with expertise in strategic planning, operations, and business development. Achieved 30% revenue increase through client base expansion."
+    id: 'purpose',
+    title: 'Purpose of the Levy',
+    content: 'The purpose of the Levy shall be to provide funds for the development of capacity through training, technical support and mentoring of the persons involved in the public procurement and asset disposal system in order to facilitate achievement of value for money in public procurement and enhance quality of public service.'
   },
   {
-    id: "Linda Susan Ingari",
-    name: "Linda Susan Ingari",
-    title: "Board Member",
-    image: Linda_Susan,
-    description: "Supply chain management specialist with over 20 years of experience in manufacturing, education, telecommunication, and banking sectors. Led development of CPSP-K curriculum."
+    id: 'commencement',
+    title: 'Commencement of the Levy',
+    content: 'The Authority through circular no. 1 of 2024 dated 30th August, 2024 notified all the procuring entities of the commencement and operationalization date for the Levy Order to be 1st September, 2024.'
   },
   {
-    id: "Allan Kamau",
-    name: "Allan Kamau",
-    title: "Board Member",
-    image: Allan_Kamau,
-    description: "Deputy Chief State Counsel at the Office of the Attorney General with expertise in commercial law, contract law, and constitutional matters."
+    id: 'deduction-remittances',
+    title: 'Deduction and Remittances',
+    content: `The levy is deducted at the rate of 0.03% of the contract sum exclusive of taxes and remitted to the Authority by the Procuring Entity on behalf of the supplier, contractor and/or service provider by the 20th day of the following month failure to which a penalty of 5% shall be applied for every month the Levy remains unremitted.
+
+The remittances are done by the Procuring Entity through e-Citizen platform: https://ppra.ecitizen.go.ke/`
   },
   {
-    id: "Amos Simiyu",
-    name: "Amos Simiyu",
-    title: "Board Member",
-    image: AmosSimiyu,
-    description: "Managing Partner at Wattanga & Luyali Associates, specializing in Commercial, Human Rights, and Constitutional law. Associate Arbitrator with the Charter Institute of Arbitrators."
+    id: 'how-to-remit',
+    title: 'How to remit the levy on eCitizen',
+    content: `To remit the Levy, follow the steps below:
+
+1. Visit https://ppra.ecitizen.go.ke/
+
+2. On the Capacity Building Levy return homepage, click Apply Now.
+
+3. Log into your e-Citizen account.
+
+4. On the bottom right corner after instructions, click Next.
+
+5. Select the procuring entity category, procuring entity name, telephone number, email and physical address.
+
+In the event that the procuring entity name is unavailable, select "other" in the Procuring Entity category then on the Procuring Entity name, specify the Procuring Entity by writing in full the name of the Procuring Entity, add contact details of the Procuring Entity and click Next.
+
+6. On the next page, Select Add GOK Funded Details then in the window, fill in contract number, supplier name, and the sub-total amount of the contract which is the contract value exclusive of applicable taxes and click save.
+
+7. If there are several contracts being paid for, continue adding GOK Funded Details following the step 6 until all the contracts are captured then click next.
+
+8. Tick declaration and preview then click complete.
+
+9. Select payment mode and download the payment instructions and proceed to make payment as per the payment instructions downloaded.`
   },
   {
-    id: "Eric Korir",
-    name: "Eric Korir",
-    title: "Board Member",
-    image: EricKorir,
-    description: "Director of Public Procurement at the National Treasury with over 25 years of experience. Chairs technical committee of the Electronic Government Procurement System."
+    id: 'research-innovations',
+    title: 'Research, Innovations & Business Systems Directorate',
+    content: `This Directorate provides the platform to promote and utilize effective strategies in ICT, align technology with the Authority's mandate, conduct research, act as organization central database and continuously re-engineer business processes.
+
+The Directorate manages three core areas:
+
+1. Develops and implements the ICT strategy, policies, and robust infrastructure (including security and disaster recovery) to support automation, analyze business needs, and maintain essential business applications and reporting systems for public procurement performance.
+
+2. Conducts quality research as mandated by the Act, develops and disseminates the public procurement market price reference guide, generates official statistics, and prepares all statutory reports for submission to Parliament and County Assemblies.
+
+3. Manages the Public Procurement State Portal and Resource Centre, overseeing the central repository and database that includes complaints, debarred contractors, market prices, and non-compliant entities, while actively fostering a culture of knowledge management and innovation.`
   },
   {
-    id: "Patrick Kimemia",
-    name: "Patrick Kimemia",
-    title: "Board Member",
-    image: PatrickKimemia,
-    description: "Head of Supply Chain Management at Kenya Generating Company PLC. Contributed to drafting of PPDA 2005 and 2015, and Public Procurement regulations."
+    id: 'how-to-file',
+    title: 'How to file the Levy on PPIP',
+    content: `Pursuant to the provisions of paragraph 9(1) and (2) of the Levy Order, Procuring Entities are expected to file the returns of the remitted Levy through PPIP using the form SL.1 available in the Levy Order.
+
+Before filing on PPIP, ensure you have already uploaded details of the contract as they are loaded when filing the return.
+
+To file the returns, follow the following steps:
+
+Step 1
+Go to PPIP Dashboard and select Capacity Building Levy and select create new.
+
+Step 2
+Populate the Contract Number, Levy Payable, Amount Paid, and attach the evidence of payment or e-Citizen Receipt and form SL.1 scanned as one pdf document with the Remittance advice/Payee advice/e-Citizen receipt being the first page and the form SL. 1 following thereafter.
+
+Step 3
+Click save and complete.`
   }
 ];
 
-// Partner data
-const partnerLogos = [
-  { 
-    src: competitionAuthorityLogo, 
-    name: "Competition Authority of Kenya",
-    website: "https://www.cak.go.ke"
+// Collection Methods
+const collectionMethods = [
+  {
+    id: 'deduction',
+    title: 'Deduction at Source',
+    description: 'The Procuring Entity is responsible for deducting the 0.03% levy from the contract price at the time of making payment to the supplier.',
+    icon: faMoneyBillWave
   },
-  { 
-    src: ecitizenLogo, 
-    name: "eCitizen",
-    website: "https://www.ecitizen.go.ke"
+  {
+    id: 'ecitizen',
+    title: 'eCitizen Integration',
+    description: 'Remittance is made directly to the PPRA through eCitizen. Alternative payment arrangements can be made after seeking guidance from the PPRA Finance Section.',
+    icon: faLaptop,
+    buttonText: 'Visit eCitizen Portal',
+    buttonUrl: 'https://ppra.ecitizen.go.ke/'
   },
-  { 
-    src: ethicsLogo, 
-    name: "Ethics and Anti-Corruption Commission",
-    website: "https://www.eacc.go.ke"
-  },
-  { 
-    src: kisimLogo, 
-    name: "KISIM",
-    website: "https://www.kisim.go.ke"
-  },
-  { 
-    src: officeOfAgLogo, 
-    name: "Office of the Attorney General",
-    website: "https://www.statelaw.go.ke"
-  },
+  {
+    id: 'progressive',
+    title: 'Progressive Remittance',
+    description: 'For multi-year or milestone-based contracts, the levy is determined on the total contract price but deducted and remitted progressively as payments are made.',
+    icon: faChartLine
+  }
 ];
 
-// ===== IMPACT SECTION =====
-const ImpactSection = () => {
-  const impactContainerRef = useRef(null);
+// Documents with real download links
+const documents = [
+  {
+    id: 'levy-order',
+    title: 'THE PUBLIC PROCUREMENT CAPACITY BUILDING LEVY ORDER, 2023',
+    size: '91.15 KB',
+    icon: faFilePdf,
+    downloadUrl: 'http://10.10.10.49/download/the-public-procurement-capacity-building-levy-order-2023-2/?wpdmdl=13937&refresh=6a30fedf2c04e1781595871'
+  }
+];
 
-  const impactSlides = [
-    {
-      pill: "Regulatory Oversight",
-      text: [
-        "Monitoring compliance with procurement laws",
-        "and regulations across all public entities",
-        "including national and county governments"
-      ]
-    },
-    {
-      pill: "Supplier Network",
-      text: [
-        "Over 50,000 suppliers and contractors",
-        "registered on the National Supplier",
-        "Database"
-      ]
-    },
-    {
-      pill: "Capacity Building",
-      text: [
-        "Training and certification for thousands",
-        "of procurement professionals annually",
-        "building capacity for better governance"
-      ]
-    }
-  ];
-
-  useGSAP(() => {
-    const container = impactContainerRef.current;
-    if (!container) return;
-
-    const slides = gsap.utils.toArray('.slide-text-block');
-    const dots = gsap.utils.toArray('.pagination-dot');
-    const topPills = gsap.utils.toArray('.slide-pill');
-    
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container,
-        start: "top top",
-        end: "+=200%",
-        pin: true,
-        scrub: 1,
-      }
-    });
-
-    gsap.set(slides.slice(1), { opacity: 0 });
-    gsap.set(slides.flatMap(slide => Array.from(slide.querySelectorAll('.line-text'))), { yPercent: 100 });
-    gsap.set(slides[0].querySelectorAll('.line-text'), { yPercent: 0 });
-    
-    gsap.set(dots.slice(1), { 
-      scale: 1, 
-      backgroundColor: "rgba(5, 150, 105, 0.2)", 
-      borderColor: "transparent" 
-    });
-    gsap.set(dots[0], { 
-      scale: 1.25, 
-      backgroundColor: "rgba(5, 150, 105, 1)", 
-      borderColor: "#059669" 
-    });
-
-    gsap.set(topPills.slice(1), { opacity: 0, scale: 0.8 });
-    gsap.set(topPills[0], { opacity: 1, scale: 1 });
-
-    impactSlides.forEach((_, index) => {
-      if (index === impactSlides.length - 1) return;
-
-      const nextIndex = index + 1;
-      const currentLines = slides[index].querySelectorAll('.line-text');
-      const nextLines = slides[nextIndex].querySelectorAll('.line-text');
-
-      tl.to(currentLines, {
-        yPercent: -100,
-        stagger: 0.05,
-        ease: "power2.inOut"
-      }, `slide-${index}`)
-      .to(slides[index], {
-        opacity: 0,
-        duration: 0.2
-      }, `slide-${index}+=0.2`)
-      .to(dots[index], {
-        scale: 1,
-        backgroundColor: "rgba(5, 150, 105, 0.2)",
-        borderColor: "transparent",
-        duration: 0.3
-      }, `slide-${index}`)
-      .to(topPills[index], {
-        opacity: 0,
-        scale: 0.8,
-        duration: 0.3,
-        ease: "power2.inOut"
-      }, `slide-${index}`)
-      .to(slides[nextIndex], {
-        opacity: 1,
-        duration: 0.2
-      }, `slide-${index}+=0.2`)
-      .to(nextLines, {
-        yPercent: 0,
-        stagger: 0.08,
-        ease: "power2.out",
-        duration: 0.6
-      }, `slide-${index}+=0.2`)
-      .to(dots[nextIndex], {
-        scale: 1.25,
-        backgroundColor: "rgba(5, 150, 105, 1)",
-        borderColor: "#059669",
-        duration: 0.3
-      }, `slide-${index}+=0.2`)
-      .to(topPills[nextIndex], {
-        opacity: 1,
-        scale: 1,
-        duration: 0.4,
-        ease: "power2.out"
-      }, `slide-${index}+=0.2`);
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === container) {
-          trigger.kill();
-        }
-      });
-    };
-  }, { scope: impactContainerRef });
-
-  return (
-    <section 
-      ref={impactContainerRef} 
-      className="section_home-about is-about relative bg-white w-full min-h-screen"
-      aria-label="PPRA Impact Overview"
-      id="impact-content"
-    >
-      {/* Decorative grid lines */}
-      <div className="line-wrapper is-invert absolute inset-0 pointer-events-none flex z-0">
-        <div className="vertical-line w-1/5 border-r border-gray-100"></div>
-        <div className="vertical-line w-1/5 border-r border-gray-100"></div>
-        <div className="vertical-line w-1/5 border-r border-gray-100"></div>
-        <div className="vertical-line w-1/5 border-r border-gray-100"></div>
-        <div className="vertical-line w-1/5 border-none"></div>
-      </div>
-
-      <div className="home-about_sticky h-screen w-full flex items-center justify-center relative z-10">
-        <div className="padding-global px-4 md:px-6 lg:px-12 w-full">
-          <div className="container-large max-w-5xl mx-auto text-center">
-            <div className="home-about_content is-about flex flex-col items-center">
-              
-              {/* Pill indicators */}
-              <div className="pill-wrapper mb-6 md:mb-8 relative h-8 w-full flex justify-center items-center">
-                {impactSlides.map((slide, slideIdx) => (
-                  <div 
-                    key={slideIdx}
-                    className="slide-pill absolute left-1/2 transform -translate-x-1/2 will-change-transform"
-                  >
-                    <div className="pill is-green inline-block bg-primary-green text-white text-xs font-bold tracking-widest px-4 py-1.5 uppercase whitespace-nowrap">
-                      {slide.pill}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Text content */}
-              <div className="home-about_text-wrapper relative w-full min-h-40 sm:min-h-30 md:min-h-45">
-                {impactSlides.map((slide, slideIdx) => (
-                  <div 
-                    key={slideIdx}
-                    className="slide-text-block absolute inset-0 w-full flex flex-col items-center justify-center"
-                  >
-                    <h3 className="text-xl md:text-3xl lg:text-4xl font-semibold text-primary-purple leading-tight tracking-tight max-w-4xl">
-                      {slide.text.map((line, lineIdx) => (
-                        <span 
-                          key={lineIdx} 
-                          className="block overflow-hidden relative h-fit py-0.5"
-                        >
-                          <span className="line-text block will-change-transform">
-                            {line}
-                          </span>
-                        </span>
-                      ))}
-                    </h3>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pagination Dots */}
-              <div className="swiper-pagination is-about flex items-center justify-center gap-4 mt-8 md:mt-12">
-                {impactSlides.map((_, dotIdx) => (
-                  <div 
-                    key={dotIdx}
-                    className="pagination-dot h-3 w-3 rounded-full border-2 border-transparent bg-primary-green origin-center will-change-transform p-0.5"
-                  />
-                ))}
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// ===== YOUTUBE VIDEO COMPONENT =====
-const YouTubeVideoPlayer = () => {
-  const iframeRef = useRef(null);
-
-  return (
-    <div className="w-full bg-gray-950 border border-gray-800/60 shadow-2xl overflow-hidden">
-      <div className="relative" style={{ paddingBottom: '56.25%' }}>
-        <iframe
-          ref={iframeRef}
-          className="absolute inset-0 w-full h-full"
-          src="https://www.youtube.com/embed/1-oyywT5sjc?rel=1"
-          title="PPRA Kenya Official Videos"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        ></iframe>
-      </div>
-      
-      {/* Channel Info Bar */}
-      <div className="bg-gray-900 text-white p-3 flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-3">
-          <img 
-            src="https://yt3.googleusercontent.com/TY9zZ0NmPhjI8Bct6aLpDIPyMjGvn4Oq04p5xAIpyZ9XG6dPVk7u7CjeAoD-YggslDtlQnlyqQ=s48-c-k-c0x00ffffff-no-rj" 
-            alt="PPRA Kenya" 
-            className="w-8 h-8 rounded-full"
-          />
-          <span className="text-sm font-medium">PPRA Kenya Official</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">8 subscribers • 4 videos</span>
-          <a 
-            href="https://www.youtube.com/@pprakenyaofficial" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-xs bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded transition-colors font-medium"
-          >
-            Subscribe
-          </a>
-          <a 
-            href="https://www.youtube.com/@pprakenyaofficial/videos" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded transition-colors font-medium"
-          >
-            View All
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ===== MAIN ABOUT COMPONENT =====
-const About = () => {
+const CapacityBuildingLevy = () => {
   const navigate = useNavigate();
-  const pageWrapperRef = useRef(null);
+  const [openAccordion, setOpenAccordion] = useState(null);
   const heroRef = useRef(null);
-  const ctaRef = useRef(null);
-  const scrollContainerRef = useRef(null);
+  const containerRef = useRef(null);
+  
+  // ===== TTS STATE =====
   const [hoverModeActive, setHoverModeActive] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const bannerDismissedRef = useRef(false);
 
-  // Handle TTS callbacks
+  // ===== TTS CALLBACKS =====
   const handleTTSStart = useCallback(() => {
     setHoverModeActive(true);
     bannerDismissedRef.current = false;
@@ -414,18 +176,17 @@ const About = () => {
     setShowBanner(false);
   }, []);
 
-  // Handle banner dismissal
+  // ===== BANNER DISMISS =====
   const handleDismissBanner = useCallback(() => {
     bannerDismissedRef.current = true;
     setShowBanner(false);
     setHoverModeActive(false);
-    // Stop TTS
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
   }, []);
 
-  // Auto-dismiss banner after 6 seconds
+  // ===== AUTO-DISMISS BANNER =====
   useEffect(() => {
     if (hoverModeActive && showBanner && !bannerDismissedRef.current) {
       const timer = setTimeout(() => {
@@ -435,7 +196,7 @@ const About = () => {
     }
   }, [hoverModeActive, showBanner]);
 
-  // Handle Escape key to dismiss banner
+  // ===== ESCAPE KEY DISMISS =====
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape' && hoverModeActive) {
@@ -447,27 +208,31 @@ const About = () => {
     return () => document.removeEventListener('keydown', handleEsc);
   }, [hoverModeActive, handleDismissBanner]);
 
-  // Leadership Carousel Scroll Handler
-  const handleScroll = useCallback((direction) => {
-    if (!scrollContainerRef.current) return;
-    
-    const container = scrollContainerRef.current;
-    const cardWidth = container.firstElementChild?.getBoundingClientRect().width || 300;
-    const gap = 24;
-    const scrollAmount = direction === 'left' ? -(cardWidth + gap) : (cardWidth + gap);
-    
-    container.scrollBy({
-      left: scrollAmount,
-      behavior: 'smooth'
-    });
-  }, []);
+  // Toggle accordion
+  const toggleAccordion = (id) => {
+    setOpenAccordion(openAccordion === id ? null : id);
+  };
 
-  // Main animations
-  useGSAP(() => {
+  useEffect(() => {
+    // Hero animation
+    if (heroRef.current) {
+      gsap.fromTo(heroRef.current.querySelector('.levy-hero_heading'),
+        { y: 50, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: 'power2.out',
+          delay: 0.3
+        }
+      );
+    }
+
+    // Section heading animations
     const headingAnimateElements = document.querySelectorAll('.heading-animate');
     headingAnimateElements.forEach((el) => {
       gsap.fromTo(el,
-        { y: 50, opacity: 0 },
+        { y: 40, opacity: 0 },
         {
           y: 0,
           opacity: 1,
@@ -482,112 +247,26 @@ const About = () => {
       );
     });
 
-    const partnerLogosEl = document.querySelectorAll('.partner-logo');
-    partnerLogosEl.forEach((logo, index) => {
-      gsap.fromTo(logo,
-        { scale: 0.8, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 0.5,
-          delay: index * 0.05,
-          scrollTrigger: {
-            trigger: logo,
-            start: 'top 95%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-    });
-
-    if (ctaRef.current) {
-      gsap.fromTo(ctaRef.current,
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: ctaRef.current,
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-    }
-
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
   return (
-    <div ref={pageWrapperRef} className="page-wrapper bg-white">
+    <div className="page-wrapper bg-white">
       <Helmet>
-        <title>About PPRA | Public Procurement Regulatory Authority</title>
-        <meta name="description" content="Learn about PPRA's history, vision, mission, and mandate in regulating public procurement in Kenya." />
-        <meta name="keywords" content="PPRA, Kenya, public procurement, procurement regulation, about PPRA, history, mandate" />
-        <meta property="og:title" content="About PPRA - Public Procurement Regulatory Authority" />
-        <meta property="og:description" content="Promoting fairness, equity, transparency, competition and cost effectiveness in public procurement." />
+        <title>Capacity Building Levy | PPRA Kenya</title>
+        <meta name="description" content="Learn about the Public Procurement Capacity Building Levy (CBL) - a strategic investment to strengthen public procurement capacity in Kenya." />
+        <meta name="keywords" content="capacity building levy, CBL, PPRA, procurement levy, public procurement, Kenya" />
+        <meta property="og:title" content="Capacity Building Levy - Public Procurement Regulatory Authority" />
+        <meta property="og:description" content="Strengthening public procurement capacity through strategic investment." />
         <meta property="og:type" content="website" />
         <meta property="og:image" content={logoImage} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href="https://ppra.go.ke/about" />
+        <link rel="canonical" href="https://ppra.go.ke/capacity-building-levy" />
       </Helmet>
 
-      {/* Global Styles */}
+      {/* ===== GLOBAL STYLES FOR TTS ===== */}
       <style>{`
-        body {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          text-rendering: optimizeLegibility;
-        }
-        .text-style-3lines {
-          display: -webkit-box;
-          overflow: hidden;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-        }
-        .text-style-2lines {
-          display: -webkit-box;
-          overflow: hidden;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-        }
-        .heading-animate {
-          overflow: hidden;
-        }
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeInUp {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-        .scrollbar-none {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-none::-webkit-scrollbar {
-          display: none;
-        }
-        .line-wrapper {
-          z-index: 0;
-        }
-        .z-index-1 {
-          z-index: 1;
-        }
-        .line-wrapper .vertical-line.border-none {
-          border-right: none !important;
-        }
-
-        /* Hover Mode Cursor Style */
         .hover-mode-active * {
           cursor: pointer !important;
         }
@@ -671,9 +350,122 @@ const About = () => {
         </div>
       )}
 
-      <main className="main-wrapper">
+      {/* Minimal custom styles */}
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeInUp {
+          animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .heading-animate {
+          overflow: hidden;
+        }
         
-        {/* ===== FLOATING TEXT-TO-SPEECH BUTTON - HOVER ONLY ===== */}
+        /* Accordion Styles */
+        .accordion-item {
+          border: 1px solid #e5e7eb;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          background: white;
+          margin-bottom: 0.5rem;
+        }
+        .accordion-item:hover {
+          border-color: #4A148C;
+          box-shadow: 0 4px 12px rgba(74, 20, 140, 0.08);
+        }
+        .accordion-item.open {
+          border-color: #4A148C;
+          box-shadow: 0 4px 16px rgba(74, 20, 140, 0.1);
+        }
+        
+        .accordion-header {
+          cursor: pointer;
+          padding: 1rem 1.25rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          user-select: none;
+          transition: all 0.3s ease;
+        }
+        .accordion-header:hover .accordion-title {
+          color: #4A148C;
+        }
+        .accordion-header .accordion-title {
+          font-weight: 600;
+          color: #1a1a2e;
+          font-size: 1rem;
+          letter-spacing: -0.01em;
+          transition: color 0.3s ease;
+        }
+        .accordion-header .accordion-icon {
+          transition: transform 0.3s ease;
+          flex-shrink: 0;
+          color: #4A148C;
+        }
+        .accordion-header .accordion-icon.open {
+          transform: rotate(180deg);
+        }
+        
+        /* Content expansion */
+        .accordion-content {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.4s ease, padding 0.3s ease;
+        }
+        .accordion-content.open {
+          max-height: 1200px;
+          padding: 0 1.25rem 1.5rem 1.25rem;
+        }
+        
+        /* Inner content fade-in */
+        .accordion-content-inner {
+          opacity: 0;
+          transform: translateY(-10px);
+          transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .accordion-content.open .accordion-content-inner {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        
+        /* Paragraph styles */
+        .accordion-content-inner p {
+          color: #4b5563;
+          font-size: 0.95rem;
+          line-height: 1.8;
+          white-space: pre-line;
+          margin-bottom: 0.25rem;
+        }
+        .accordion-content-inner p:last-child {
+          margin-bottom: 0;
+        }
+        .accordion-content-inner br {
+          display: none;
+        }
+
+        @media (max-width: 640px) {
+          .accordion-header {
+            padding: 0.875rem 1rem;
+          }
+          .accordion-header .accordion-title {
+            font-size: 0.9rem;
+          }
+          .accordion-content.open {
+            padding: 0 1rem 1.25rem 1rem;
+          }
+          .accordion-content-inner p {
+            font-size: 0.875rem;
+            line-height: 1.7;
+          }
+        }
+      `}</style>
+
+      {/* Main Content */}
+      <main className="main-wrapper">
+
+        {/* ===== FLOATING TEXT-TO-SPEECH BUTTON ===== */}
         <div className="fixed bottom-6 left-6 z-50">
           <TextToSpeech 
             className="shadow-2xl"
@@ -685,35 +477,51 @@ const About = () => {
           />
         </div>
 
-        {/* ===== HERO SECTION ===== */}
-        <section className="section_about-hero relative pt-8">
-          <div className="line-wrapper is-invert absolute inset-0 pointer-events-none flex">
-            <div className="vertical-line w-1/5 border-r border-gray-200"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-            <div className="vertical-line w-1/5 border-r border-gray-200"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
+        {/* ============================================================ */}
+        {/* HERO SECTION */}
+        {/* ============================================================ */}
+        <section className="section-levy-hero relative pt-8">
+          <div className="line-wrapper absolute inset-0 pointer-events-none flex">
+            <div className="w-1/5 border-r border-gray-200"></div>
+            <div className="w-1/5 border-none"></div>
+            <div className="w-1/5 border-none"></div>
+            <div className="w-1/5 border-r border-gray-200"></div>
+            <div className="w-1/5 border-none"></div>
           </div>
 
-          <div className="padding-global z-index-1 relative px-4 md:px-6 lg:px-12">
-            <div className="container-large max-w-7xl mx-auto">
-              <div ref={heroRef} className="about-hero_component relative h-[45vh] md:h-[50vh] lg:h-[55vh] flex items-center justify-center">
-                <div className="absolute inset-0 parallax w-full h-full">
+          <div className="z-index-1 relative px-4 md:px-6 lg:px-12">
+            <div className="max-w-7xl mx-auto">
+              <div ref={heroRef} className="relative h-[45vh] md:h-[50vh] lg:h-[55vh] flex items-center justify-center overflow-hidden bg-slate-900">
+                <div className="absolute inset-0 w-full h-full opacity-40">
                   <img 
                     src={corporateSky} 
-                    alt="PPRA Hero - Modern cityscape representing public procurement" 
-                    className="w-full h-full object-cover"
+                    alt="PPRA Capacity Building Levy" 
+                    className="w-full h-full object-cover grayscale brightness-75"
                     loading="eager"
                   />
                 </div>
-                <div className="about-hero_gradient absolute inset-0 bg-primary-purple-dark/50"></div>
                 
-                <div className="about-hero_heading max-w-4xl mx-auto text-center z-10 px-4">
-                  <h1 className="heading-style-h1 text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold animate-fadeInUp leading-tight">
-                    Public Procurement Regulatory Authority
+                {/* Hero Overlay Lines */}
+                <div className="absolute inset-0 pointer-events-none flex">
+                  <div className="w-1/5 border-r border-white/10"></div>
+                  <div className="w-1/5 border-none"></div>
+                  <div className="w-1/5 border-none"></div>
+                  <div className="w-1/5 border-r border-white/10"></div>
+                  <div className="w-1/5 border-none"></div>
+                </div>
+                
+                <div className="levy-hero_heading max-w-4xl mx-auto text-center z-10 px-4">
+                  <div className="mb-3 md:mb-4">
+                    <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-[10px] md:text-xs font-bold tracking-widest px-4 py-1.5 uppercase border border-white/30">
+                      <FontAwesomeIcon icon={faMoneyBillWave} className="mr-2" />
+                      Public Procurement Capacity Building Levy
+                    </span>
+                  </div>
+                  <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold animate-fadeInUp leading-tight">
+                    Capacity Building Levy
                   </h1>
                   <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl mt-3 md:mt-4 opacity-90 animate-fadeInUp leading-relaxed" style={{ animationDelay: '0.2s' }}>
-                    Promoting Fairness, Equity, Transparency, Competition and Cost Effectiveness in Public Procurement
+                    Strengthening public procurement capacity through strategic investment
                   </p>
                 </div>
               </div>
@@ -721,555 +529,206 @@ const About = () => {
           </div>
         </section>
 
-        {/* ===== HISTORY SECTION ===== */}
-        <section className="section_history relative bg-white">
-          <div className="line-wrapper is-invert absolute inset-0 pointer-events-none flex">
-            <div className="vertical-line w-1/5 border-r border-gray-200"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-            <div className="vertical-line w-1/5 border-r border-gray-200"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
+        {/* ============================================================ */}
+        {/* CONTENT SECTION */}
+        {/* ============================================================ */}
+        <section className="section-levy-content relative bg-white">
+          <div className="line-wrapper absolute inset-0 pointer-events-none flex">
+            <div className="w-1/5 border-r border-gray-200"></div>
+            <div className="w-1/5 border-none"></div>
+            <div className="w-1/5 border-none"></div>
+            <div className="w-1/5 border-r border-gray-200"></div>
+            <div className="w-1/5 border-none"></div>
           </div>
 
-          <div className="z-index-1 relative">
-            <div className="padding-global padding-section-large px-4 md:px-6 lg:px-12 py-12 md:py-24">
-              <div className="container-large max-w-7xl mx-auto">
-                <div className="history_component">
-                  <div className="history_header text-center mb-10 md:mb-16">
-                    <div className="pill-wrapper flex justify-center mb-4">
-                      <div className="pill is-black inline-block bg-primary-purple text-white text-sm px-4 py-1.5">OUR HISTORY</div>
-                    </div>
-                   
-                    <h2 className="heading-style-h2 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-purple leading-tight">
-                      Evolution of Public Procurement in Kenya
-                    </h2>
-                  </div>
-
-                  <div className="history_content max-w-4xl mx-auto">
-                    <div className="text-color-black-light">
-                      <div className="text-size-medium text-gray-700 space-y-4 md:space-y-5">
-                        <p className="text-base md:text-lg leading-relaxed">
-                          The Public Procurement System in Kenya has evolved from a crude system with no regulations to an orderly legally regulated procurement system. The Government's Procurement system was originally contained in the Supplies Manual of 1978, which was supplemented by circulars that were issued from time to time by the Treasury. The Director of Government Supply Services was responsible for ensuring the proper observance of the provisions of the Manual. The Manual created various tender boards for adjudication of tenders and their awards.
-                        </p>
-                        
-                        <p className="text-base md:text-lg leading-relaxed">
-                          A review of the country's public procurement systems was undertaken in 1999 and established that:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2 md:space-y-3">
-                          <li className="text-base md:text-lg leading-relaxed">There was no uniform procurement system for the public sector as a whole</li>
-                          <li className="text-base md:text-lg leading-relaxed">It did not have sanctions or penalties against persons who breached the regulations in the Supplies Manual, other than internal disciplinary action. Consequently application of the rules was not strict and many of the norms were not followed</li>
-                          <li className="text-base md:text-lg leading-relaxed">The Supplies Manual did not cover procurement of works</li>
-                          <li className="text-base md:text-lg leading-relaxed">The dispute settlement mechanisms relating to the award procedures as set out in the manual were weak and unreliable for ensuring fairness and transparency</li>
-                          <li className="text-base md:text-lg leading-relaxed">Records of procurement transactions in many cases were found to be inaccurate or incomplete or absent, which led to suspicions of dishonest dealings at the tender boards</li>
-                        </ul>
-                        <p className="text-base md:text-lg leading-relaxed">
-                          The systems had other institutional weaknesses that not only undermined its capacity for carrying out their mandates effectively but also led to a public perception that the public sector was not getting maximum value for money spent on procurement.
-                        </p>
-                        
-                        <p className="text-base md:text-lg leading-relaxed">
-                          In view of the above shortcomings, it was found necessary to have a law to govern the procurement system in the public sector and to establish the necessary institutions to ensure that all procurement entities observe the provisions of the law for the purpose of attaining the objectives of an open tender system in the sector.
-                        </p>
-                        
-                        <p className="text-base md:text-lg leading-relaxed">
-                          Consequently the establishment of the Exchequer and Audit (Public Procurement) Regulations 2001 which created the Public Procurement Directorate (PPD) and the Public Procurement Complaints, Review and Appeals Board (PPCRAB). The PPD and PPCRAB, though largely independent in carrying out their activities, had been operating as departments in the Ministry of Finance on which they relied for staff, facilities and funding. Since these institutional arrangements have a potential for undermining the impartiality of these bodies in the long run it was found necessary to create an oversight body whose existence was based on a law.
-                        </p>
-                        
-                        <p className="text-base md:text-lg leading-relaxed">
-                          The Public Procurement and Disposal Act, 2005 was thus enacted and it became operational on 1st January, 2007 with the gazettement of the Public Procurement and Disposal Regulations, 2006.
-                        </p>
-                        
-                        <p className="text-base md:text-lg leading-relaxed font-semibold text-primary-purple">
-                          In January 2016, the Public Procurement and Asset Disposal Act, 2015 (the Act) was enacted. This massively changed the mandate of the Public Procurement Oversight Authority (PPOA) as it largely assumed the regulatory function which then transited to Public Procurement Regulatory Authority (PPRA). The Act establishes the Public Procurement Regulatory Authority among other functions, to monitor, assess and review the public procurement and Asset Disposal system to ensure they respect the National values and other provisions including Article 227 of the constitution on public procurement.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ===== VISION & MISSION SECTION ===== */}
-        <section className="section_vision-mission relative bg-gray-50">
-          <div className="line-wrapper is-invert absolute inset-0 pointer-events-none flex">
-            <div className="vertical-line w-1/5 border-r border-gray-200"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-            <div className="vertical-line w-1/5 border-r border-gray-200"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-          </div>
-
-          <div className="z-index-1 relative">
-            <div className="padding-global padding-section-large px-4 md:px-6 lg:px-12 py-12 md:py-24">
-              <div className="container-large max-w-7xl mx-auto">
-                <div className="vision-mission_component">
-                  <div className="vision-mission_header text-center mb-10 md:mb-16">
-                    <div className="pill-wrapper flex justify-center mb-4">
-                      <div className="pill is-black inline-block bg-primary-purple text-white text-sm px-4 py-1.5">OUR VISION & MISSION</div>
-                    </div>
-                    <div className="heading-animate">
-                      <h2 className="heading-style-h2 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-purple leading-tight">
-                        Guiding Our Purpose
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 max-w-5xl mx-auto">
-                    {/* Vision */}
-                    <div className="bg-white p-6 md:p-8">
-                      <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-primary-purple/10 flex items-center justify-center mr-4 shrink-0">
-                          <svg className="w-6 h-6 text-primary-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                          </svg>
-                        </div>
-                        <h3 className="text-xl md:text-2xl font-bold text-primary-purple">Vision</h3>
-                      </div>
-                      <p className="text-gray-700 text-base md:text-lg leading-relaxed">
-                        A dynamic, effective and efficient public procurement and asset disposal system.
-                      </p>
-                    </div>
-
-                    {/* Mission */}
-                    <div className="bg-white p-6 md:p-8">
-                      <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-primary-green/10 flex items-center justify-center mr-4 shrink-0">
-                          <svg className="w-6 h-6 text-primary-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                        </div>
-                        <h3 className="text-xl md:text-2xl font-bold text-primary-green">Mission</h3>
-                      </div>
-                      <p className="text-gray-700 text-base md:text-lg leading-relaxed">
-                        To promote fairness, equity, transparency, competition and cost effectiveness through continuous monitoring, assessment and review of the public procurement and asset disposal system for sustainable development.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Core Values */}
-                  <div className="mt-10 md:mt-16 max-w-5xl mx-auto">
-                    <div className="text-center mb-8 md:mb-10">
-                      <h3 className="text-2xl md:text-3xl font-bold text-primary-purple">Core Values</h3>
-                      <div className="w-16 h-0.5 bg-primary-green mx-auto mt-3"></div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-                      <div className="bg-white p-6 md:p-8 text-center">
-                        <div className="w-16 h-16 bg-primary-purple/10 flex items-center justify-center mx-auto mb-4">
-                          <svg className="w-8 h-8 text-primary-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                          </svg>
-                        </div>
-                        <h4 className="text-xl md:text-2xl font-semibold text-primary-purple mb-3">Honesty</h4>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Upholding truthfulness and integrity in all procurement processes and interactions.</p>
-                      </div>
-
-                      <div className="bg-white p-6 md:p-8 text-center">
-                        <div className="w-16 h-16 bg-primary-green/10 flex items-center justify-center mx-auto mb-4">
-                          <svg className="w-8 h-8 text-primary-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                          </svg>
-                        </div>
-                        <h4 className="text-xl md:text-2xl font-semibold text-primary-green mb-3">Integrity</h4>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Maintaining the highest ethical standards and moral principles in all operations.</p>
-                      </div>
-
-                      <div className="bg-white p-6 md:p-8 text-center">
-                        <div className="w-16 h-16 bg-primary-purple/10 flex items-center justify-center mx-auto mb-4">
-                          <svg className="w-8 h-8 text-primary-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                          </svg>
-                        </div>
-                        <h4 className="text-xl md:text-2xl font-semibold text-primary-purple mb-3">Accountability</h4>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Taking responsibility for actions and decisions, ensuring transparency in all dealings.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ===== MANDATE SECTION ===== */}
-        <section className="section_mandate relative bg-white">
-          <div className="line-wrapper is-invert absolute inset-0 pointer-events-none flex">
-            <div className="vertical-line w-1/5 border-r border-gray-200"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-            <div className="vertical-line w-1/5 border-r border-gray-200"></div>
-            <div className="vertical-line w-1/5 border-none"></div>
-          </div>
-
-          <div className="padding-global padding-section-large mobile-up px-4 md:px-6 lg:px-12 py-12 md:py-24">
-            <div className="container-large max-w-7xl mx-auto">
-              <div className="mandate_component">
-                <div className="mandate_header text-center mb-10 md:mb-16">
-                  <div className="pill-wrapper flex justify-center mb-4">
-                    <div className="pill is-black inline-block bg-primary-purple text-white text-sm px-4 py-1.5">OUR MANDATE</div>
-                  </div>
+          <div className="z-index-1 relative px-4 md:px-6 lg:px-12 py-12 md:py-24">
+            <div className="max-w-4xl mx-auto">
+              <div ref={containerRef} className="levy-component">
+                
+                {/* ============================================================ */}
+                {/* INTRODUCTION */}
+                {/* ============================================================ */}
+                <div className="levy-intro mb-10 md:mb-16">
                   <div className="heading-animate">
-                    <h2 className="heading-style-h2 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-purple leading-tight">
-                      Our Functions & Responsibilities
+                    <h2 className="text-2xl md:text-4xl font-bold text-primary-purple mb-4 md:mb-6 leading-tight">
+                      The Public Procurement Capacity Building Levy (CBL)
                     </h2>
                   </div>
-                  <p className="text-gray-600 text-base md:text-lg mt-4 max-w-3xl mx-auto leading-relaxed">
-                    Section 9 of the Public Procurement and Asset Disposal Act, 2015 confers the Authority with the following functions:
-                  </p>
-                </div>
-
-                <div className="mandate_grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">
-                  <div className="bg-gray-200 p-5 md:p-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-primary-purple/10 flex items-center justify-center shrink-0 mr-4">
-                        <span className="text-primary-purple font-bold">01</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-primary-purple mb-2 text-base md:text-lg">Monitoring & Assessment</h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Monitor, assess and review the public procurement and asset disposal system to ensure they respect the national values and other provisions of the Constitution.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-5 md:p-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-primary-green/10 flex items-center justify-center shrink-0 mr-4">
-                        <span className="text-primary-green font-bold">02</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-primary-purple mb-2 text-base md:text-lg">Standards Enforcement</h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Enforce any standards developed under the Act and prepare, issue and publicise standard public procurement and asset disposal documents.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-5 md:p-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-primary-purple/10 flex items-center justify-center shrink-0 mr-4">
-                        <span className="text-primary-purple font-bold">03</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-primary-purple mb-2 text-base md:text-lg">Complaints & Investigations</h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Investigate and act on complaints received on procurement and asset disposal proceedings from procuring entities, tenderers, contractors or the general public.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-5 md:p-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-primary-green/10 flex items-center justify-center shrink-0 mr-4">
-                        <span className="text-primary-green font-bold">04</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-primary-purple mb-2 text-base md:text-lg">Preference & Reservation Schemes</h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Monitor the implementation of the preference and reservation schemes by procuring entities and provide quarterly public reports.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-5 md:p-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-primary-purple/10 flex items-center justify-center shrink-0 mr-4">
-                        <span className="text-primary-purple font-bold">05</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-primary-purple mb-2 text-base md:text-lg">Central Repository & Database</h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Create a central repository including complaints, debarred entities, market prices, benchmarks, non-compliant entities, and statistics related to public procurement.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-5 md:p-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-primary-green/10 flex items-center justify-center shrink-0 mr-4">
-                        <span className="text-primary-green font-bold">06</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-primary-purple mb-2 text-base md:text-lg">Training & Capacity Development</h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Develop, promote and support the training and capacity development of persons involved in procurement and asset disposal.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-5 md:p-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-primary-purple/10 flex items-center justify-center shrink-0 mr-4">
-                        <span className="text-primary-purple font-bold">07</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-primary-purple mb-2 text-base md:text-lg">Research & Development</h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Research on the public procurement and asset disposal system and any developments arising from the same, advising on international standards.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-5 md:p-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-primary-green/10 flex items-center justify-center shrink-0 mr-4">
-                        <span className="text-primary-green font-bold">08</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-primary-purple mb-2 text-base md:text-lg">Code of Ethics</h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Develop a code of ethics to guide procuring entities and winning bidders when undertaking public procurement and disposal with State organs and public entities.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-200 p-5 md:p-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-primary-green/10 flex items-center justify-center shrink-0 mr-4">
-                        <span className="text-primary-green font-bold">09</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-primary-purple mb-2 text-base md:text-lg">Reporting & Cooperation</h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">Report to Parliament and county assemblies, cooperate with state and non-state actors to obtain recommendations for improving public procurement.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ===== ORGANIZATIONAL STRUCTURE ===== */}
-        <section className="section_org-structure relative bg-white">
-          <div className="padding-global px-4 md:px-6 lg:px-12 py-12 md:py-20">
-            <div className="container-large max-w-7xl mx-auto">
-              <div className="text-center mb-10 md:mb-14">
-                <div className="pill-wrapper flex justify-center mb-4">
-                  <div className="pill is-black inline-block bg-primary-purple text-white text-sm px-4 py-1.5">ORGANIZATIONAL STRUCTURE</div>
-                </div>
-                <div className="heading-animate">
-                  <h2 className="heading-style-h2 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-purple leading-tight">
-                    How We Are Organized
-                  </h2>
-                </div>
-                <p className="text-gray-600 text-base md:text-lg mt-4 max-w-3xl mx-auto leading-relaxed">
-                  Understanding our governance and operational framework
-                </p>
-              </div>
-
-              <div className="max-w-5xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-10">
-                  <div className="bg-primary-purple/5 p-6 md:p-8 border border-primary-purple/10 hover:border-primary-purple/30 transition-all duration-300">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-primary-purple/10 flex items-center justify-center mr-3 shrink-0">
-                        <svg className="w-5 h-5 text-primary-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                      </div>
-                      <h4 className="text-lg md:text-xl font-bold text-primary-purple">Public Procurement Regulatory Board</h4>
-                    </div>
-                    <p className="text-gray-600 text-sm md:text-base leading-relaxed pl-13">
-                      Oversees policy implementation, compliance monitoring, and regulatory framework enforcement across all public procurement entities.
+                  <div className="space-y-4 md:space-y-5">
+                    <p className="text-gray-700 text-base md:text-lg leading-relaxed">
+                      To ensure the integrity, efficiency, and sustainability of Kenya's public procurement system, the Public Procurement Regulatory Authority (PPRA) operationalized the Public Procurement Capacity Building Levy in 2024.
                     </p>
-                  </div>
-
-                  <div className="bg-primary-purple/5 p-6 md:p-8 border border-primary-purple/10 hover:border-primary-purple/30 transition-all duration-300">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-primary-green/10 flex items-center justify-center mr-3 shrink-0">
-                        <svg className="w-5 h-5 text-primary-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                      </div>
-                      <h4 className="text-lg md:text-xl font-bold text-primary-green">Public Procurement Administrative Review Board</h4>
-                    </div>
-                    <p className="text-gray-600 text-sm md:text-base leading-relaxed pl-13">
-                      Handles complaints, reviews procurement decisions, and ensures fair dispute resolution in the procurement process.
+                    <p className="text-gray-700 text-base md:text-lg leading-relaxed">
+                      The levy is paid by the <strong className="text-primary-purple">supplier</strong> on all procurement contracts signed with a <strong className="text-primary-purple">Procuring Entity.</strong>
+                    </p>
+                    <p className="text-gray-700 text-base md:text-lg leading-relaxed">
+                      This levy is a strategic investment aimed at enhancing the skills and technical competencies of all stakeholders—including public entities and private suppliers—participating in the public procurement and asset disposal ecosystem.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white p-6 md:p-8 lg:p-10 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
-                  <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-primary-purple/10 flex items-center justify-center mr-4 shrink-0">
-                      <svg className="w-6 h-6 text-primary-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
+                {/* ============================================================ */}
+                {/* HOW IT'S COLLECTED */}
+                {/* ============================================================ */}
+                <div className="mb-10 md:mb-16">
+                  <div className="heading-animate">
+                    <h3 className="text-2xl md:text-3xl font-bold text-primary-purple mb-6 md:mb-8">
+                      How is it Collected?
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    {collectionMethods.map((method) => (
+                      <div key={method.id} className="bg-white p-5 md:p-6 border border-gray-200 hover:border-primary-purple/30 hover:shadow-md transition-all duration-300 flex flex-col">
+                        <div className="flex items-start gap-4 flex-1">
+                          <div className="w-11 h-11 bg-primary-purple/10 flex items-center justify-center shrink-0">
+                            <FontAwesomeIcon icon={method.icon} className="text-primary-purple text-lg" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-800 mb-2 text-base md:text-lg">
+                              {method.title}
+                            </h4>
+                            <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                              {method.description}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Green Button - Full width at bottom */}
+                        {method.buttonText && method.buttonUrl && (
+                          <a 
+                            href={method.buttonUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold text-sm md:text-base rounded-lg transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                          >
+                            <FontAwesomeIcon icon={faLaptop} className="text-sm" />
+                            {method.buttonText}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ============================================================ */}
+                {/* EXEMPTIONS */}
+                {/* ============================================================ */}
+                <div className="mb-10 md:mb-16 bg-primary-purple/5 border-l-4 border-primary-purple p-4 md:p-6">
+                  <div className="flex items-start gap-4">
+                    <FontAwesomeIcon icon={faShieldAlt} className="text-primary-purple text-xl shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-xl md:text-2xl font-bold text-primary-purple">Director General & Nine Directorates</h4>
-                      <p className="text-gray-600 text-sm">Led by the Director General, the Authority operates through specialized directorates</p>
+                      <p className="text-gray-700 text-base md:text-lg leading-relaxed">
+                        <strong className="text-primary-purple">Exemptions:</strong> The levy does <strong className="text-red-600">not</strong> apply to contracts that are fully funded by <strong className="text-primary-purple">development partners</strong>.
+                      </p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                    {[
-                      { name: "LEGAL SERVICES DIRECTORATE", icon: <FontAwesomeIcon icon={faScaleBalanced} /> },
-                      { name: "STANDARDS DEVELOPMENT AND CAPACITY BUILDING DIRECTORATE", icon: <FontAwesomeIcon icon={faGraduationCap} /> },
-                      { name: "COMPLIANCE MONITORING DIRECTORATE", icon: <FontAwesomeIcon icon={faChartLine} /> },
-                      { name: "DIGITAL TRANSFORMATION DIRECTORATE", icon: <FontAwesomeIcon icon={faLaptopCode} /> },
-                      { name: "COMPLAINTS AND INVESTIGATION DIRECTORATE", icon: <FontAwesomeIcon icon={faMagnifyingGlass} /> },
-                      { name: "STRATEGY AND PARTNERSHIPS DIRECTORATE", icon: <FontAwesomeIcon icon={faHandshake} /> },
-                      { name: "CORPORATE SERVICE DIRECTORATE", icon: <FontAwesomeIcon icon={faBuilding} /> },
-                      { name: "INTERNAL AUDIT AND RISK ASSURANCE DIRECTORATE", icon: <FontAwesomeIcon icon={faShieldHalved} /> }
-                    ].map((directorate, index) => (
+                {/* ============================================================ */}
+                {/* LEGAL DOCUMENTS */}
+                {/* ============================================================ */}
+                <div className="mb-10 md:mb-16">
+                  <div className="heading-animate">
+                    <h3 className="text-2xl md:text-3xl font-bold text-primary-purple mb-6 md:mb-8">
+                      Legal Documents
+                    </h3>
+                  </div>
+                  <div className="space-y-3 md:space-y-4">
+                    {documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between gap-4 md:gap-6 flex-wrap border border-gray-200 p-4 md:p-5 hover:border-primary-purple/30 hover:shadow-md transition-all duration-300">
+                        <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-50">
+                          <div className="w-10 h-10 bg-primary-purple/10 flex items-center justify-center shrink-0">
+                            <FontAwesomeIcon icon={doc.icon} className="text-primary-purple text-lg" />
+                          </div>
+                          <div>
+                            <p className="text-sm md:text-base font-semibold text-gray-900 leading-snug">{doc.title}</p>
+                            <span className="text-xs md:text-sm text-gray-500">{doc.size}</span>
+                          </div>
+                        </div>
+                        <a 
+                          href={doc.downloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 text-xs md:text-sm font-bold text-primary-purple hover:text-white hover:bg-primary-purple border-2 border-primary-purple transition-all duration-300 hover:shadow-md"
+                          download
+                        >
+                          <FontAwesomeIcon icon={faDownload} className="w-3.5 h-3.5" />
+                          <span>Download</span>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ============================================================ */}
+                {/* ACCORDION SECTION - DETAILED INFORMATION */}
+                {/* ============================================================ */}
+                <div className="mb-10 md:mb-16">
+                  <div className="heading-animate">
+                    <h3 className="text-2xl md:text-3xl font-bold text-primary-purple mb-6 md:mb-8">
+                      Detailed Information
+                    </h3>
+                  </div>
+                  <div className="space-y-3 md:space-y-4">
+                    {levyAccordionData.map((item) => (
                       <div 
-                        key={index} 
-                        className="bg-gray-50 p-3 md:p-4 border border-gray-100 hover:border-primary-purple/20 hover:bg-primary-purple/5 transition-all duration-200 group"
+                        key={item.id} 
+                        className={`accordion-item ${openAccordion === item.id ? 'open' : ''}`}
                       >
-                        <div className="flex items-start">
-                          <span className="text-primary-purple text-lg md:text-xl mr-2 group-hover:scale-110 transition-transform duration-200">
-                            {directorate.icon}
-                          </span>
-                          <span className="text-gray-600 text-xs md:text-sm font-medium leading-tight group-hover:text-primary-purple transition-colors duration-200">
-                            {directorate.name}
-                          </span>
+                        <div 
+                          className="accordion-header"
+                          onClick={() => toggleAccordion(item.id)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              toggleAccordion(item.id);
+                            }
+                          }}
+                          aria-expanded={openAccordion === item.id}
+                        >
+                          <span className="accordion-title">{item.title}</span>
+                          <FontAwesomeIcon 
+                            icon={faChevronDown}
+                            className={`accordion-icon w-5 h-5 md:w-6 md:h-6 ${openAccordion === item.id ? 'open' : ''}`}
+                          />
+                        </div>
+                        <div className={`accordion-content ${openAccordion === item.id ? 'open' : ''}`}>
+                          <div className="accordion-content-inner">
+                            {item.content.split('\n\n').map((paragraph, idx) => (
+                              <p key={idx} className="mb-1 last:mb-0">
+                                {paragraph}
+                              </p>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-6 md:mt-8 flex items-center justify-center gap-2 text-gray-500 text-sm">
-                  <svg className="w-4 h-4 text-primary-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>The Director General provides strategic leadership across all directorates</span>
-                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ===== IMPACT SECTION ===== */}
-        <ImpactSection />
-
-        {/* ===== LEADERSHIP SECTION ===== */}
-        <section className="section_leadership relative bg-white overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none flex z-0">
-            <div className="w-1/5 border-r border-gray-100"></div>
-            <div className="w-1/5 border-none"></div>
-            <div className="w-1/5 border-none"></div>
-            <div className="w-1/5 border-r border-gray-100"></div>
-            <div className="w-1/5 border-none"></div>
-          </div>
-
-          <div className="relative max-w-full mx-auto py-12 md:py-24 z-10">
-            <div className="text-center max-w-4xl mx-auto px-4 md:px-6">
-              <div className="mb-4">
-                <span className="inline-block bg-primary-purple text-white text-[10px] font-bold tracking-widest px-4 py-1.5 uppercase">
-                  Our Leadership
-                </span>
-              </div>
-              
-              <h2 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-primary-purple tracking-tight leading-tight">
-                Executive Leadership.<br className="hidden sm:block" />Strategic Vision.
-              </h2>
-              
-              <p className="text-gray-500 mt-3 md:mt-4 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-                Meet the dedicated leaders driving transparency, accountability, and excellence in Kenya's public procurement.
-              </p>
-            </div>
-
-            <div className="relative mt-8 md:mt-12 group/controls px-4 md:px-12 lg:px-16">
-              <button 
-                onClick={() => handleScroll('left')}
-                className="absolute left-0 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-primary-purple text-white p-3 hover:bg-primary-purple-dark transition-colors focus:outline-none"
-                aria-label="Scroll left"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-              </button>
-
-              <button 
-                onClick={() => handleScroll('right')}
-                className="absolute right-0 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-primary-purple text-white p-3 hover:bg-primary-purple-dark transition-colors focus:outline-none"
-                aria-label="Scroll right"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </button>
-
-              <div 
-                ref={scrollContainerRef}
-                className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-4"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {leadershipTeamPreview.map((member) => (
-                  <div 
-                    key={member.id} 
-                    className="group shrink-0 snap-start w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)]"
-                  >
-                    <div className="relative overflow-hidden bg-slate-100 aspect-3/4 w-full">
-                      <img 
-                        src={member.image} 
-                        alt={member.name}
-                        className="w-full h-full object-cover object-top"
-                      />
-                      
-                      <div className="absolute inset-0 bg-linear-to-t from-primary-purple-dark/80 via-primary-purple-dark/20 to-transparent opacity-90"></div>
-                      
-                      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 text-white text-left z-10">
-                        <h4 className="font-bold text-base md:text-lg lg:text-xl tracking-tight leading-snug">{member.name}</h4>
-                        <p className="text-xs uppercase tracking-wider text-white/70 mt-1 font-semibold">{member.title}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="text-center mt-8 md:mt-12 px-4">
-              <div>
-                <button
-                  onClick={() => navigate('/leadership')}
-                  className="inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-primary-green text-white text-sm md:text-base font-bold hover:bg-primary-green-dark transition-colors"
-                >
-                  <span>Learn More About Our Leaders</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                  </svg>
-                </button>
-              </div>
-              <p className="text-gray-400 text-xs mt-6">
-                7 executive board members governing PPRA
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ===== VIDEO & NEWS SECTION ===== */}
-        <section className="section_cta relative bg-white overflow-hidden pb-12 md:pb-16">
-          <div className="padding-global z-index-1 px-4 md:px-6 lg:px-12">
-            <div className="container-large max-w-7xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto">
-                <div className="w-full bg-gray-950 border border-gray-800/60 shadow-2xl overflow-hidden">
-                  <YouTubeVideoPlayer />
-                </div>
-
-                <div className="bg-gray-100 overflow-hidden">
-                  <img 
-                    src={newspaperImage} 
-                    alt="PPRA Financial News Coverage" 
-                    className="w-full h-56 md:h-64 object-cover"
-                    loading="lazy"
-                  />
-                  <div className="p-4 md:p-6">
-                    <h3 className="text-lg md:text-xl font-semibold text-primary-purple mb-2">PPRA in the News</h3>
-                    <p className="text-gray-600 text-sm md:text-base leading-relaxed">Coverage of PPRA's initiatives and impact on public financial management.</p>
-                    <a href="/news" className="inline-block mt-3 md:mt-4 text-primary-green hover:text-primary-green-dark font-medium transition-colors">
-                      Read more →
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ===== CTA SECTION - Regional Offices ===== */}
+        {/* ============================================================ */}
+        {/* CTA SECTION - Regional Offices */}
+        {/* ============================================================ */}
         <section className="relative bg-slate-950 px-4 md:px-6 lg:px-8 xl:px-12 py-12 md:py-20 text-white">
           <div className="max-w-7xl mx-auto relative z-10">
+            
             <div>
               <h3 className="text-xs md:text-sm font-black uppercase tracking-widest text-slate-400 mb-10 text-center">
                 Our Regional Network
               </h3>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 text-left">
+                
+                {/* Nairobi - Head Office */}
                 <div className="bg-slate-900/40 p-5 lg:p-4 xl:p-6 border border-slate-900 hover:border-slate-800 transition-colors flex flex-col justify-between h-full">
                   <div>
                     <h4 className="text-sm md:text-base font-black text-white mb-3 uppercase tracking-wide border-b border-slate-800 pb-2">
@@ -1287,6 +746,7 @@ const About = () => {
                   </div>
                 </div>
 
+                {/* Coast Regional Office */}
                 <div className="bg-slate-900/40 p-5 lg:p-4 xl:p-6 border border-slate-900 hover:border-slate-800 transition-colors flex flex-col justify-between h-full">
                   <div>
                     <h4 className="text-sm md:text-base font-black text-white mb-3 uppercase tracking-wide border-b border-slate-800 pb-2">
@@ -1305,6 +765,7 @@ const About = () => {
                   </div>
                 </div>
 
+                {/* Western Kenya Regional Office */}
                 <div className="bg-slate-900/40 p-5 lg:p-4 xl:p-6 border border-slate-900 hover:border-slate-800 transition-colors flex flex-col justify-between h-full">
                   <div>
                     <h4 className="text-sm md:text-base font-black text-white mb-3 uppercase tracking-wide border-b border-slate-800 pb-2">
@@ -1322,6 +783,7 @@ const About = () => {
                   </div>
                 </div>
 
+                {/* North Rift Regional Office */}
                 <div className="bg-slate-900/40 p-5 lg:p-4 xl:p-6 border border-slate-900 hover:border-slate-800 transition-colors flex flex-col justify-between h-full">
                   <div>
                     <h4 className="text-sm md:text-base font-black text-white mb-3 uppercase tracking-wide border-b border-slate-800 pb-2">
@@ -1338,6 +800,7 @@ const About = () => {
                   </div>
                 </div>
 
+                {/* South Rift Regional Office */}
                 <div className="bg-slate-900/40 p-5 lg:p-4 xl:p-6 border border-slate-900 hover:border-slate-800 transition-colors flex flex-col justify-between h-full">
                   <div>
                     <h4 className="text-sm md:text-base font-black text-white mb-3 uppercase tracking-wide border-b border-slate-800 pb-2">
@@ -1353,13 +816,16 @@ const About = () => {
                     <p className="text-slate-400">E: <a href="mailto:nakuru@ppra.go.ke" className="text-sky-400 hover:text-sky-300 hover:underline font-medium break-all">nakuru@ppra.go.ke</a></p>
                   </div>
                 </div>
+
               </div>
             </div>
+
           </div>
         </section>
+
       </main>
     </div>
   );
 };
 
-export default About;
+export default CapacityBuildingLevy;
